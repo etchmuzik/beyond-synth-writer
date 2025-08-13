@@ -1,0 +1,59 @@
+name: Build Plugins
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-macos:
+    name: Build on macOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          brew install cmake || true
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build plugin
+        run: cmake --build build --config Release --target BeyondSynthWriterPlugin_artefacts
+
+      - name: Upload artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: beyond-synth-writer-macos
+          path: |
+            build/BeyondSynthWriterPlugin_artefacts/Release/*
+
+  build-windows:
+    name: Build on Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Configure CMake
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build plugin
+        run: cmake --build build --config Release --target BeyondSynthWriterPlugin_artefacts
+
+      - name: Upload artefacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: beyond-synth-writer-windows
+          path: |
+            build/BeyondSynthWriterPlugin_artefacts/Release/*
